@@ -62,8 +62,7 @@ func main() {
 
 					// Set the global state CityWeather
 					utils.SetCityWeather(city)
-
-          services.GetWeatherData()
+					services.GetWeatherData()
 
 					break
 				}
