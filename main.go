@@ -63,8 +63,7 @@ func main() {
 					// Set the global state CityWeather
 					utils.SetCityWeather(city)
 
-					// Check if services package recieved state update
-					services.TestCity()
+          services.GetWeatherData()
 
 					break
 				}
