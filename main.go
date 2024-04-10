@@ -2,11 +2,19 @@ package main
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
-	"github.com/joho/godotenv"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/joho/godotenv"
+	"github.com/luka2220/discGo/services"
+	"github.com/luka2220/discGo/utils"
+)
+
+// Global State
+var (
+	CityGlobal string
 )
 
 func main() {
@@ -51,6 +59,13 @@ func main() {
 			for _, option := range i.ApplicationCommandData().Options {
 				if option.Name == "city" {
 					city = option.Value.(string)
+
+					// Set the global state CityWeather
+					utils.SetCityWeather(city)
+
+					// Check if services package recieved state update
+					services.TestCity()
+
 					break
 				}
 			}
