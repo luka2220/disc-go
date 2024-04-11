@@ -5,11 +5,11 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+  "log"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 	"github.com/luka2220/discGo/services"
-	"github.com/luka2220/discGo/utils"
 )
 
 // Global State
@@ -18,6 +18,7 @@ var (
 )
 
 func main() {
+  log.SetFlags(log.LstdFlags | log.Lshortfile)
 	err := godotenv.Load()
 
 	var (
@@ -54,23 +55,31 @@ func main() {
 	commandHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"weather": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			var city string
+      var response string
 
 			// Loop through the options to find the "city" option
 			for _, option := range i.ApplicationCommandData().Options {
 				if option.Name == "city" {
-					city = option.Value.(string)
+					city = option.Value.(string)	
 
-					// Set the global state CityWeather
-					utils.SetCityWeather(city)
-					services.GetWeatherData()
+          weatherService := services.NewScheduleService(city)
+          weatherData, err := weatherService.FetchWeatherData()
 
+          if err != nil {
+            log.Println("An Error occurred")
+          }
+
+          response = fmt.Sprintf("Weather for %s\nTeampurature is %.2f°C\nTemp Low %.2f°C\nTemp High %.2f°C\n",
+            city, weatherData.Main.Temp, weatherData.Main.TempMin, weatherData.Main.TempMax)
+
+                    
 					break
 				}
 			}
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("Getting the weather for %s...", city),
+					Content: fmt.Sprintf(response),
 				},
 			})
 		},
