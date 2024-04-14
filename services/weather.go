@@ -14,8 +14,13 @@ type WeatherDataService struct {
 	URL string
 }
 
-func NewScheduleService(city string) *WeatherDataService {
-	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=4b131da2c3d34ffbf959576862e58b66&units=metric", city)
+type TestingOptions struct {
+  URL string
+}
+
+func NewScheduleService(city string, params... TestingOptions) *WeatherDataService {
+	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=4b131da2c3d34ffbf959576862e58b66&units=metric", city) 
+  fmt.Println(params[0].URL)
 
 	return &WeatherDataService{
 		url,
