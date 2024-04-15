@@ -2,15 +2,24 @@ package main
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
-	"github.com/joho/godotenv"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/joho/godotenv"
+	"github.com/luka2220/discGo/services/weather"
+)
+
+// Global State
+var (
+	CityGlobal string
 )
 
 func main() {
-	err := godotenv.Load()
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	_ = godotenv.Load()
 
 	var (
 		TOKEN      = os.Getenv("TOKEN")
@@ -23,9 +32,7 @@ func main() {
 	if err != nil {
 		fmt.Println("Error creating discord session: ", err)
 		return
-	}
-
-	dg.ChannelMessageSend(CHANNEL_ID, "Bot Online")
+	}	
 
 	// Create the commands
 	commands := []*discordgo.ApplicationCommand{
@@ -46,18 +53,30 @@ func main() {
 	commandHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"weather": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			var city string
+			var response string
 
 			// Loop through the options to find the "city" option
 			for _, option := range i.ApplicationCommandData().Options {
 				if option.Name == "city" {
 					city = option.Value.(string)
+
+					weatherService := weather.NewWeatherService(city)
+					weatherData, nerr := weatherService.FetchWeatherData()
+
+					if nerr != nil {
+						log.Println("An Error occurred")
+					}
+
+					response = fmt.Sprintf("Weather for %s\nTeampurature is %.2f°C\nTemp Low %.2f°C\nTemp High %.2f°C\n",
+						city, weatherData.Main.Temp, weatherData.Main.TempMin, weatherData.Main.TempMax)
+
 					break
 				}
 			}
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("Getting the weather for %s...", city),
+					Content: fmt.Sprintf(response),
 				},
 			})
 		},
