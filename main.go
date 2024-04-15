@@ -32,7 +32,7 @@ func main() {
 	if err != nil {
 		fmt.Println("Error creating discord session: ", err)
 		return
-	}	
+	}
 
 	// Create the commands
 	commands := []*discordgo.ApplicationCommand{
