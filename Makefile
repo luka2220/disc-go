@@ -14,3 +14,7 @@ tidy:
 # Run the program
 run:
 	go run main.go
+
+# Run weather services test
+test weather:
+	go test -v ./services/weather

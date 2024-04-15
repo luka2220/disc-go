@@ -1,7 +1,7 @@
 package main
 
 import (
- "fmt"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
-	"github.com/luka2220/discGo/services"
+	"github.com/luka2220/discGo/services/weather"
 )
 
 // Global State
@@ -19,7 +19,7 @@ var (
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	err := godotenv.Load()
+	_ = godotenv.Load()
 
 	var (
 		TOKEN      = os.Getenv("TOKEN")
@@ -32,9 +32,7 @@ func main() {
 	if err != nil {
 		fmt.Println("Error creating discord session: ", err)
 		return
-	}
-
-	dg.ChannelMessageSend(CHANNEL_ID, "Bot Online")
+	}	
 
 	// Create the commands
 	commands := []*discordgo.ApplicationCommand{
@@ -62,10 +60,10 @@ func main() {
 				if option.Name == "city" {
 					city = option.Value.(string)
 
-					weatherService := services.NewScheduleService(city)
-					weatherData, err := weatherService.FetchWeatherData()
+					weatherService := weather.NewWeatherService(city)
+					weatherData, nerr := weatherService.FetchWeatherData()
 
-					if err != nil {
+					if nerr != nil {
 						log.Println("An Error occurred")
 					}
 

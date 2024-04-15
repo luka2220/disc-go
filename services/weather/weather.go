@@ -1,4 +1,4 @@
-package services
+package weather
 
 import (
 	"bufio"
@@ -14,13 +14,12 @@ type WeatherDataService struct {
 	URL string
 }
 
-type TestingOptions struct {
-  URL string
-}
+func NewWeatherService(city string, params ...WeatherDataService) *WeatherDataService {
+	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=4b131da2c3d34ffbf959576862e58b66&units=metric", city)
 
-func NewScheduleService(city string, params... TestingOptions) *WeatherDataService {
-	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=4b131da2c3d34ffbf959576862e58b66&units=metric", city) 
-  fmt.Println(params[0].URL)
+	if len(params) > 0 {
+		url = params[0].URL
+	}
 
 	return &WeatherDataService{
 		url,

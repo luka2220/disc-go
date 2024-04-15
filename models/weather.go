@@ -6,9 +6,9 @@ package models
 type Weather struct {
 	Lon        float64        `json:"lon"`
 	Lat        float64        `json:"lot"`
-	Weather    []weatherChild `json:"weather"`
+	Weather    []WeatherChild `json:"weather"`
 	Base       string         `json:"base"`
-	Main       mainChild      `json:"main"`
+	Main       MainChild      `json:"main"`
 	Visibility int            `json:"visibility"`
 	Wind       windChild      `json:"wind"`
 	CityId     int32          `json:"id"`
@@ -16,14 +16,14 @@ type Weather struct {
 }
 
 // Weather child representing weather condition data
-type weatherChild struct {
+type WeatherChild struct {
 	Id          int    `json:"id"`
 	Main        string `json:"main"`
 	Description string `json:"description"`
 }
 
 // Main child representing tempurature data
-type mainChild struct {
+type MainChild struct {
 	Temp      float64 `json:"temp"`
 	FeelsLike float64 `json:"feels_like"`
 	TempMin   float64 `json:"temp_min"`
