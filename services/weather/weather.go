@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/luka2220/discGo/models"
 )
 
@@ -15,7 +17,16 @@ type WeatherDataService struct {
 }
 
 func NewWeatherService(city string, params ...WeatherDataService) *WeatherDataService {
-	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=4b131da2c3d34ffbf959576862e58b66&units=metric", city)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading in weather map environment var: %s", err)
+	}
+
+	var appiId string = os.Getenv("OPEN_WEATHER_ID")
+
+	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric", city, appiId)
 
 	if len(params) > 0 {
 		url = params[0].URL
@@ -41,7 +52,6 @@ func (w *WeatherDataService) FetchWeatherData() (*models.Weather, error) {
 	log.Printf("Response status: %s\n", response.Status)
 
 	scanner := bufio.NewScanner(response.Body)
-
 	var weatherDataBytes []byte
 	var weatherData *models.Weather
 
