@@ -16,5 +16,9 @@ run:
 	go run main.go
 
 # Run weather services test
-test weather:
+test-weather:
 	go test -v ./services/weather
+
+# Run github services test
+test-github:
+	go test -v ./services/github

@@ -107,8 +107,8 @@ func main() {
 						log.Fatalf("Error occurred: %s", err)
 					}
 
-          response = fmt.Sprintf("%s Profile Data\nName: %s\nBio: %s\nFollower count: %d\nProfile URL: %s\nAvatar URL: %s\n", 
-            username, githubData.Name, githubData.Bio, githubData.Followers, githubData.Url, githubData.AvatarURL)
+					response = fmt.Sprintf("%s Profile Data\nName: %s\nBio: %s\nFollower count: %d\nProfile URL: %s\nAvatar URL: %s\n",
+						username, githubData.Name, githubData.Bio, githubData.Followers, githubData.Url, githubData.AvatarURL)
 
 					break
 				}
@@ -117,9 +117,9 @@ func main() {
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-          CustomID: fmt.Sprintf("github-user-search_%s", i.Interaction.Member.User.ID),
-          Content: response,
-        },
+					CustomID: fmt.Sprintf("github-user-search_%s", i.Interaction.Member.User.ID),
+					Content:  response,
+				},
 			})
 
 		},

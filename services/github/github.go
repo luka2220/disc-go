@@ -12,15 +12,17 @@ import (
 
 type GithubUserService struct {
 	URL string
-  username string
 }
 
-func NewGithubUserService(username string) *GithubUserService {
+func NewGithubUserService(username string, params ...GithubUserService) *GithubUserService {
 	url := fmt.Sprintf("https://api.github.com/users/%s", username)
+
+	if len(params) > 0 {
+		url = params[0].URL
+	}
 
 	return &GithubUserService{
 		url,
-    username,
 	}
 }
 
@@ -49,7 +51,7 @@ func (g *GithubUserService) FetchGithubUser() (*models.GithubUser, error) {
 		return nil, err
 	}
 
-  githubData.Url = fmt.Sprintf("https://github.com/%s", g.username)
+	githubData.Url = fmt.Sprintf(g.URL)
 
 	return githubData, nil
 }
