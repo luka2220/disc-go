@@ -1,6 +1,7 @@
 package github
 
 import (
+	"bufio"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -69,9 +70,11 @@ func TestGithubUser(t *testing.T) {
 	}
 
 	t1 := assert.Equal(t, testResponseExcpected, testUserResponse)
-	if t1 == true {
-		t.Log(*testUserResponse)
+	if t1 == false {
+		t.Fatal("Unexcpeted values... Results not equal")
 	}
+
+	t.Log(*testUserResponse)
 }
 
 /*
@@ -85,4 +88,43 @@ func TestGithubUser(t *testing.T) {
 func TestGithubAPI(t *testing.T) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
+	res, err := http.Get("https://api.github.com/users/luka2220")
+
+	if err != nil {
+		t.Fatalf("An error occured requesting github api URL = %v", err)
+	}
+
+	defer res.Body.Close()
+
+	scanner := bufio.NewScanner(res.Body)
+
+	var responseBytes []byte
+	var jsonResponse models.GithubUser
+
+	// NOTE:: This test will fail if the user changes any profile info from below
+	excpectedResult := &models.GithubUser{
+		Name:      "Luka Piplica",
+		AvatarURL: "https://avatars.githubusercontent.com/u/42144047?v=4",
+		Url:       "https://api.github.com/users/luka2220",
+		Blog:      "https://luka2220.github.io/cv/",
+		Email:     "",
+		Bio:       "Computer Science student at Trent University 💻\r\nContact me at piplicaluka64@gmail.com ",
+		Followers: 14,
+	}
+
+	for scanner.Scan() {
+		responseBytes = scanner.Bytes()
+	}
+
+	err = json.Unmarshal(responseBytes, &jsonResponse)
+	if err != nil {
+		t.Fatalf("Error unpacking bytes from json response = %v", err)
+	}
+
+	tc1 := assert.Equal(t, excpectedResult, &jsonResponse)
+	if tc1 == false {
+		t.Fatal("Unexcpected values... Result are not equal")
+	}
+
+	t.Logf("Result = %v", jsonResponse)
 }
