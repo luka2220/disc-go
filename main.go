@@ -9,6 +9,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
+	"github.com/luka2220/discGo/services/github"
 	"github.com/luka2220/discGo/services/weather"
 )
 
@@ -48,6 +49,18 @@ func main() {
 				},
 			},
 		},
+		{
+			Name:        "github-user",
+			Description: "Look up a users github profile and stats",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "username",
+					Description: "Username to search github",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Required:    true,
+				},
+			},
+		},
 	}
 
 	commandHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
@@ -61,9 +74,9 @@ func main() {
 					city = option.Value.(string)
 
 					weatherService := weather.NewWeatherService(city)
-					weatherData, nerr := weatherService.FetchWeatherData()
+					weatherData, werr := weatherService.FetchWeatherData()
 
-					if nerr != nil {
+					if werr != nil {
 						log.Println("An Error occurred")
 					}
 
@@ -79,6 +92,36 @@ func main() {
 					Content: fmt.Sprintf(response),
 				},
 			})
+		},
+		"github-user": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			var username string
+			var response string
+
+			for _, option := range i.ApplicationCommandData().Options {
+				if option.Name == "username" {
+					username = option.Value.(string)
+
+					githubService := github.NewGithubUserService(username)
+					githubData, gerr := githubService.FetchGithubUser()
+					if gerr != nil {
+						log.Fatalf("Error occurred: %s", err)
+					}
+
+					response = fmt.Sprintf("%s Profile Data\nName: %s\nBio: %s\nFollower count: %d\nProfile URL: %s\nAvatar URL: %s\n",
+						username, githubData.Name, githubData.Bio, githubData.Followers, githubData.Url, githubData.AvatarURL)
+
+					break
+				}
+			}
+
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					CustomID: fmt.Sprintf("github-user-search_%s", i.Interaction.Member.User.ID),
+					Content:  response,
+				},
+			})
+
 		},
 	}
 
@@ -103,9 +146,11 @@ func main() {
 	}
 
 	// Initialize the commands
-	_, err = dg.ApplicationCommandCreate(dg.State.User.ID, GUILD_ID, commands[0])
-	if err != nil {
-		fmt.Println("Error occured creating slash command: ", err)
+	for i := 0; i < len(commands); i++ {
+		_, err = dg.ApplicationCommandCreate(dg.State.User.ID, GUILD_ID, commands[i])
+		if err != nil {
+			fmt.Println("Error occured creating slash command: ", err)
+		}
 	}
 
 	// Wait here until CTRL-C or other term signal is received.
